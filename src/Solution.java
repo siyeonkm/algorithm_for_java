@@ -1,39 +1,66 @@
 /*
-두 큐끼리 원소의 수가 같은 필요는 없음
-큐의 합이 작으면 다른큐에서 하나 빼와서 넣어보고, 줄이고 하는식으로 하면 될듯
-*/
+해시 연습용 문제
 
+*/
 import java.util.*;
 
 public class Solution {
-    public int solution(int[] queue1, int[] queue2) {
-        Deque<Integer> deq1 = new ArrayDeque<>();
-        Queue<Integer> deq2 = new ArrayDeque<>();
-        int cnt = 0;
+    int N; int E;
+    int[][] matrix;
 
-        long s1=0, s2=0, sum;
-        for (int tmp : queue1) {deq1.add(tmp); s1+=tmp;}
-        for (int tmp : queue2) {deq2.add(tmp); s2+=tmp;}
-        sum = s1+s2;
-        if (sum%2 == 1) return -1;
-        else sum /=2;
+    public int[] dijkstra(int start) {
+        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(a -> a[0]));
+        boolean[] visited = new boolean[N];
+        int[] distance = new int[N];
+        Arrays.fill(distance, Integer.MAX_VALUE);
+        distance[start] = 0;
+        pq.add(new int[] {0, start});
 
-        while(cnt<=queue1.length*4 && deq1.size() < queue1.length*2 && deq1.size() != 0) {
-            if (s1 == sum) return cnt;
-
-            else if (s1 > sum) {
-                s1-=deq1.peek();
-                s2+=deq1.peek();
-                deq2.add(deq1.remove());
-                cnt++;
+        while (!pq.isEmpty()) {
+            int[] cur = pq.remove();
+            int u = cur[1];
+            if (visited[u]) {
+                continue;
             }
-            else if (s1 < sum && s1 > 0){
-                s2-=deq2.peek();
-                s1+=deq2.peek();
-                deq1.add(deq2.remove());
-                cnt++;
+
+            visited[u] = true;
+            for (int v = 0; v < N; v++) {
+                if(matrix[u][v] == 0) {
+                    continue;
+                }
+                if (distance[u] + matrix[u][v] < distance[v]) {
+                    distance[v] = distance[u] + matrix[u][v];
+                    pq.add(new int[]{distance[v], v});
+                }
             }
         }
-        return -1;
+
+        return distance;
+    }
+
+    public int solution(int n, int s, int a, int b, int[][] fares) {
+        N = n;
+        E = fares.length;
+        matrix = new int[n][n];
+
+        for (int i = 0; i < E; i++) {
+            int u = fares[i][0] - 1;
+            int v = fares[i][1] - 1;
+            int cost = fares[i][2];
+            matrix[u][v] = cost;
+            matrix[v][u] = cost;
+        }
+
+        int[] together = dijkstra(s - 1);
+        int minCost = Integer.MAX_VALUE;
+        for(int i = 0; i < N; i++) {
+            int[] alone = dijkstra(i);
+            int cost = together[i] + alone[a - 1] + alone[b - 1];
+            if(cost < minCost) {
+                minCost = cost;
+            }
+        }
+
+        return minCost;
     }
 }
