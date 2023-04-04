@@ -5,62 +5,79 @@
 import java.util.*;
 
 public class Solution {
-    int N; int E;
-    int[][] matrix;
+    int[] apeach = new int[11];
+    int[] answer = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    int max = 0;
 
-    public int[] dijkstra(int start) {
-        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(a -> a[0]));
-        boolean[] visited = new boolean[N];
-        int[] distance = new int[N];
-        Arrays.fill(distance, Integer.MAX_VALUE);
-        distance[start] = 0;
-        pq.add(new int[] {0, start});
 
-        while (!pq.isEmpty()) {
-            int[] cur = pq.remove();
-            int u = cur[1];
-            if (visited[u]) {
-                continue;
-            }
-
-            visited[u] = true;
-            for (int v = 0; v < N; v++) {
-                if(matrix[u][v] == 0) {
-                    continue;
-                }
-                if (distance[u] + matrix[u][v] < distance[v]) {
-                    distance[v] = distance[u] + matrix[u][v];
-                    pq.add(new int[]{distance[v], v});
-                }
-            }
+    public boolean compare(int[] ryan) {
+        for(int i = 10; i >= 0; i--) {
+            if (answer[i] == -1) return true;
+            if(ryan[i] > answer[i]) return true;
+            else if (ryan[i] < answer[i]) return false;
         }
-
-        return distance;
+        return false;
     }
 
-    public int solution(int n, int s, int a, int b, int[][] fares) {
-        N = n;
-        E = fares.length;
-        matrix = new int[n][n];
-
-        for (int i = 0; i < E; i++) {
-            int u = fares[i][0] - 1;
-            int v = fares[i][1] - 1;
-            int cost = fares[i][2];
-            matrix[u][v] = cost;
-            matrix[v][u] = cost;
+    public void calculate(int[] ryan) {
+        int totalR = 0;
+        int totalA = 0;
+        for(int i = 0; i < 11; i++) {
+            if(ryan[i] > apeach[i]) totalR += (10-i);
+            else if(apeach[i] > 0) totalA += (10-i);
         }
 
-        int[] together = dijkstra(s - 1);
-        int minCost = Integer.MAX_VALUE;
-        for(int i = 0; i < N; i++) {
-            int[] alone = dijkstra(i);
-            int cost = together[i] + alone[a - 1] + alone[b - 1];
-            if(cost < minCost) {
-                minCost = cost;
+        int diff = totalR - totalA;
+        if (diff > 0 && max <= diff) {
+            if(max == diff && !compare(ryan)) return;
+            max = diff;
+            for(int i =0; i< 11; i++) {
+                answer[i] = ryan[i];
+            }
+            //answer = ryan; 이렇게 넣으면 동기화되버림
+            //System.out.println(Arrays.toString(ryan) + " " + diff);
+        }
+    }
+
+    //dfs 백트래킹식으로 구현
+    public void shoot(int arrow, int idx, int[] ryan) {
+        if(arrow==0 || idx == 11) {
+            ryan[10] += arrow;
+            calculate(ryan);
+            ryan[10] -= arrow;
+            return;
+        }
+
+        if (arrow > apeach[idx]) {
+            ryan[idx] += apeach[idx]+1;
+            shoot(arrow-(apeach[idx]+1), idx+1, ryan);
+            ryan[idx] -= apeach[idx]+1;
+        }
+        shoot(arrow, idx+1, ryan);
+    }
+
+    public int[] solution(int n) {
+        int[][] info = {{1, 2}, {1, 3}, {1, 4}, {2, 4}, {3, 4}};
+        HashMap<Integer, ArrayList<Integer>> map = new HashMap<>();
+
+        for(int i=0; i<info.length; i++) {
+            int a = info[i][0];
+            int b = info[i][1];
+
+            if(!map.containsKey(a)) map.put(a, new ArrayList<>(List.of(b)));
+            else{
+                ArrayList<Integer> input = map.get(a);
+                input.add(b);
+                map.replace(a, input);
+            }
+
+            if(!map.containsKey(a)) map.put(a, new ArrayList<>(List.of(b)));
+            else{
+                ArrayList<Integer> input = map.get(a);
+                input.add(b);
+                map.replace(a, input);
             }
         }
-
-        return minCost;
     }
+
 }
