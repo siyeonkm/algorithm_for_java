@@ -1,59 +1,41 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.StringTokenizer;
+import java.io.*;
+import java.util.*;
 
+//문제가 되게 독특하다.
+//dp의 idx는 0 ~ k로 연속적인 정수의 무게값으로 생각함.
+//j의 값은 가방에 그만큼의 무게를 넣는다고 했을때 가능한 value는? 임
+//j=3일때 넣을 수 있는 값이 있고, 4는 없을때 dp[4]에는 3의 값을 그대로 넣어줌
 public class Main {
-    int[][] graph;
+    static int[][] item;
 
-    public void print(int[] result) {
-        String output = "";
-        for (int r : result) {
-            output += r + " "
+    //흔한 냅색문제 + dp라고 한다. 알아두자.
+    static int solution(int n, int max) {
+        //물품수는 최대 100개임
+        int[] dp = new int[max+1];
+
+        for(int i=0; i<=n; i++) {
+            //j는 가방 남은 무게가 현재 넣을 item보다 많아야 진행한다는 뜻
+            for(int j=max; j>=item[i][0]; j--) {
+                dp[j] = Math.max(dp[j - item[i][0]]+item[i][1], dp[j]);
+            }
         }
-        System.out.println(output);
+        return dp[max];
     }
 
-    public int[] bfs(n, v, int[] graph) {
-        Queue<Integer> q = new ArrayDeque<>();
-
-    }
-
-    public int[] dfs(n, v, int[] graph) {
-
-    }
-
-    public void solution(n, v, int[] info) {
-        for(int i=0; i<info.length; i++) {
-            int a = info[i][0];
-            int b = info[i][1];
-            graph[a][b] = graph[b][a] = 1;
-        }
-
-        int[] result = bfs(v);
-        print(result);
-
-        rsult = dfs(v);
-        print(result);
-    }
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
 
         int n = Integer.parseInt(st.nextToken());
-        int m = Integer.parseInt(st.nextToken());
-        int v = Integer.parseInt(st.nextToken());
+        int k = Integer.parseInt(st.nextToken());
+        item = new int[n][2];
 
-        int[][] input = new int[m][2];
-        for(int i=0; i<m; i++) {
-            st = new StringTokenizer(br.readline(), " ");
-            input[i][0] = Integer.parseInt(st.nextToken());
-            input[i][1] = Integer.parseInt(st.nextToken());
+        for(int i=0; i<n; i++) {
+            st = new StringTokenizer(br.readLine(), " ");
+            item[i][0] = Integer.parseInt(st.nextToken());
+            item[i][1] = Integer.parseInt(st.nextToken());
         }
-
-        solution(n, v, input);
-
+        int output = solution(n, k);
     }
 }
